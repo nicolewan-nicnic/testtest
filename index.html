@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoàn Kiếm · shift planner</title>
+<style>
+  :root {
+    --red: #c0392b;
+    --orange: #e05c1a;
+    --gold: #c8861a;
+    --cream: #f5efe2;
+    --dark: #1e1206;
+    --mid: #4a2e14;
+    --light: #ede3d0;
+    --green: #2d5a27;
+    --border: #c4a97a;
+    --font-display: Georgia, 'Times New Roman', serif;
+    --font-body: 'Courier New', Courier, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--cream); color: var(--dark); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--dark);
+    color: var(--cream);
+    padding: 1.4rem 2rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    position: relative;
+  }
+  .logo-wrap {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--gold);
+  }
+  .logo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .header-text h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--cream);
+  }
+  .header-text h1 span { color: var(--orange); }
+  .header-text p {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--border);
+    margin-top: 0.3rem;
+  }
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 1300px; margin: 0 auto; padding: 1.5rem 1.25rem; }
+
+  /* ── CARDS ── */
+  .card { background: white; border: 1.5px solid var(--border); border-radius: 3px; margin-bottom: 1.25rem; overflow: hidden; }
+  .card-header {
+    background: var(--dark);
+    color: var(--orange);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.65rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-header .tag {
+    background: var(--orange);
+    color: var(--dark);
+    font-family: var(--font-body);
+    font-size: 0.58rem;
+    font-weight: 700;
+    padding: 0.12rem 0.45rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 2px;
+  }
+  .card-body { padding: 1.1rem; }
+
+  /* ── SETTINGS ── */
+  .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.9rem; }
+  .field-group { display: flex; flex-direction: column; gap: 0.25rem; }
+  .field-group label { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); font-weight: 500; }
+  .field-group input {
+    border: 1.5px solid var(--border);
+    background: var(--cream);
+    padding: 0.5rem 0.65rem;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    color: var(--dark);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field-group input:focus { border-color: var(--orange); }
+
+  /* ── RESULTS BAR ── */
+  .results-bar {
+    background: var(--dark);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    overflow: hidden;
+    border-radius: 3px;
+    margin-bottom: 1.25rem;
+  }
+  .result-cell { padding: 0.9rem 1rem; border-right: 1px solid rgba(255,255,255,0.08); text-align: center; }
+  .result-cell:last-child { border-right: none; }
+  .result-cell .val { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--orange); line-height: 1; }
+  .result-cell .lbl { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--border); margin-top: 0.3rem; }
+  .result-cell.profit .val { color: #6fcf97; }
+  .result-cell.loss .val { color: #eb5757; }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  thead tr { background: var(--light); }
+  th { text-align: left; padding: 0.55rem 0.65rem; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); font-weight: 600; border-bottom: 1.5px solid var(--border); }
+  td { padding: 0.45rem 0.55rem; border-bottom: 1px solid var(--light); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fdf7ee; }
+  table input[type="text"], table input[type="number"] {
+    border: 1px solid var(--border);
+    background: var(--cream);
+    padding: 0.28rem 0.4rem;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: var(--dark);
+    border-radius: 2px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+  }
+  table input:focus { border-color: var(--orange); background: white; }
+  .calc-cell { color: var(--mid); font-weight: 500; }
+  .calc-cell.highlight { color: var(--green); font-weight: 700; }
+  .pos { color: var(--green); font-weight: 700; }
+  .neg { color: var(--red); font-weight: 700; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.45rem 0.85rem;
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1.5px solid;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .btn-add { background: transparent; border-color: var(--green); color: var(--green); margin-top: 0.65rem; }
+  .btn-add:hover { background: var(--green); color: white; }
+  .btn-del { background: transparent; border-color: #ddbdbd; color: var(--red); padding: 0.22rem 0.4rem; font-size: 0.65rem; margin-top: 0; }
+  .btn-del:hover { background: var(--red); color: white; border-color: var(--red); }
+  .btn-export { background: var(--orange); border-color: var(--orange); color: white; }
+  .btn-export:hover { background: #c04d12; border-color: #c04d12; }
+  .btn-import { background: transparent; border-color: var(--border); color: var(--cream); }
+  .btn-import:hover { background: rgba(255,255,255,0.12); }
+
+  /* ── TABS ── */
+  .tabs { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 1.1rem; }
+  .tab {
+    padding: 0.55rem 1rem;
+    font-family: var(--font-body);
+    font-size: 0.67rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--mid);
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -1.5px;
+    transition: all 0.15s;
+  }
+  .tab.active { color: var(--orange); border-bottom-color: var(--orange); font-weight: 600; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── CHIPS ── */
+  .link-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; align-items: center; min-width: 140px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.2rem;
+    background: var(--light); border: 1px solid var(--border);
+    border-radius: 999px; padding: 0.12rem 0.45rem 0.12rem 0.55rem;
+    font-size: 0.62rem; color: var(--mid); white-space: nowrap;
+  }
+  .chip-del { background: none; border: none; cursor: pointer; color: var(--red); font-size: 0.8rem; line-height: 1; padding: 0; font-weight: 700; }
+  .chip-del:hover { color: var(--dark); }
+  .chip-link-btn {
+    background: transparent; border: 1px dashed var(--border); color: var(--mid);
+    border-radius: 999px; padding: 0.12rem 0.55rem; font-size: 0.62rem;
+    cursor: pointer; font-family: var(--font-body); white-space: nowrap; transition: all 0.15s;
+  }
+  .chip-link-btn:hover { border-color: var(--green); color: var(--green); background: #f0faf5; }
+
+  /* ── MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,10,2,0.7); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border: 2px solid var(--border); border-radius: 4px; padding: 1.5rem; max-width: 420px; width: 92%; max-height: 82vh; overflow-y: auto; }
+  .modal h3 { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 0.2rem; }
+  .modal-sub { font-size: 0.68rem; color: var(--mid); margin-bottom: 0.9rem; letter-spacing: 0.03em; min-height: 1.1rem; }
+  .modal-list { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1.1rem; }
+  .modal-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0.7rem; border: 1.5px solid var(--border); border-radius: 2px; cursor: pointer; font-size: 0.78rem; transition: all 0.12s; user-select: none; }
+  .modal-item:hover { border-color: var(--gold); background: var(--cream); }
+  .modal-item.selected { border-color: var(--green); background: #f0faf5; }
+  .modal-item input[type="checkbox"] { accent-color: var(--green); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+  .modal-item-name { flex: 1; font-weight: 500; }
+  .modal-item-cost { color: var(--mid); font-size: 0.68rem; }
+  .modal-actions { display: flex; gap: 0.45rem; justify-content: flex-end; }
+  .btn-confirm { background: var(--dark); color: var(--orange); border-color: var(--dark); }
+  .btn-confirm:hover { background: var(--mid); }
+  .btn-cancel { background: transparent; border-color: var(--border); color: var(--mid); }
+  .btn-cancel:hover { border-color: var(--mid); }
+
+  /* ── HIDDEN FILE INPUT ── */
+  #csvImportInput { display: none; }
+
+  /* ── NOTICE ── */
+  .notice { font-size: 0.62rem; color: var(--border); margin-top: 0.6rem; line-height: 1.5; }
+
+  footer { text-align: center; padding: 1.5rem; font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--border); }
+  @media (max-width: 700px) {
+    .settings-grid { grid-template-columns: 1fr 1fr; }
+    .results-bar { grid-template-columns: 1fr 1fr; }
+    td,th { padding: 0.3rem 0.3rem; }
+    .header-actions { display: none; }
+  }
+
+  /* ── SYNC INDICATOR ── */
+  .sync-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #6fcf97; display: inline-block;
+    margin-right: 0.4rem; flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .sync-dot.saving { background: var(--gold); animation: pulse 0.8s infinite; }
+  .sync-dot.error  { background: var(--red); }
+  .sync-status {
+    font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--border); display: flex; align-items: center;
+    margin-top: 0.25rem;
+  }
+  /* ── LOADING OVERLAY ── */
+  #loadingOverlay {
+    position: fixed; inset: 0; background: var(--dark);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 999; color: var(--cream);
+  }
+  #loadingOverlay h2 { font-family: var(--font-display); color: var(--orange); margin-bottom: 0.5rem; }
+  #loadingOverlay p  { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--border); }
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--orange); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin-bottom: 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* ── SHOPPING CHECKLIST ── */
+  .shop-row.bought td { opacity: 0.38; text-decoration: line-through; }
+  .shop-row.bought { order: 2; }
+  .shop-check {
+    width: 18px; height: 18px; accent-color: var(--green);
+    cursor: pointer; flex-shrink: 0;
+  }
+  .shop-progress {
+    display: flex; align-items: center; gap: 0.7rem;
+    margin-bottom: 0.8rem; font-size: 0.72rem; color: var(--mid);
+  }
+  .shop-progress-bar {
+    flex: 1; height: 6px; background: var(--light);
+    border-radius: 999px; overflow: hidden;
+  }
+  .shop-progress-fill {
+    height: 100%; background: var(--green);
+    border-radius: 999px; transition: width 0.3s;
+  }
+  .shop-tbody { display: flex; flex-direction: column; }
+
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <h2>Hoàn Kiếm</h2>
+  <p>Loading your shift data...</p>
+</div>
+
+<header>
+  <div class="logo-wrap">
+    <img src="data:image/jpeg;base64,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" alt="Hoàn Kiếm logo">
+  </div>
+  <div class="header-text">
+    <h1>Hoàn Kiếm <span>&middot;</span> shift planner</h1>
+    <p>Vietnamese Street Food · Cost &amp; Profit Calculator</p>
+    <div class="sync-status">
+      <span class="sync-dot" id="syncDot"></span>
+      <span id="syncLabel">Connected</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-import" onclick="document.getElementById('csvImportInput').click()">&#8679; Import CSV</button>
+    <button class="btn btn-export" onclick="exportToExcel()">&#8681; Export to Excel</button>
+  </div>
+</header>
+<input type="file" id="csvImportInput" accept=".csv" onchange="importFromCSV(this)" style="display:none;">
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-header">&#9881; Shift Settings <span class="tag">configure</span></div>
+    <div class="card-body">
+      <div class="settings-grid">
+        <div class="field-group">
+          <label>Shift Length (hours)</label>
+          <input type="number" id="shiftHours" value="6" min="1" max="24" step="1">
+        </div>
+        <div class="field-group">
+          <label>Portions per Hour</label>
+          <input type="number" id="portionsPerHour" value="13" min="1" step="1">
+        </div>
+        <div class="field-group">
+          <label>Total Portions (auto)</label>
+          <input type="number" id="totalPortions" value="78" readonly style="background:#eee;color:#888;cursor:not-allowed;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-bar">
+    <div class="result-cell"><div class="val" id="res-portions">78</div><div class="lbl">Total Portions</div></div>
+    <div class="result-cell"><div class="val" id="res-revenue">&#163;0</div><div class="lbl">Est. Revenue</div></div>
+    <div class="result-cell"><div class="val" id="res-cost">&#163;0</div><div class="lbl">Ingredient Cost</div></div>
+    <div class="result-cell profit"><div class="val" id="res-profit">&#163;0</div><div class="lbl">Est. Profit</div></div>
+    <div class="result-cell"><div class="val" id="res-misc">&#163;0</div><div class="lbl">Misc Costs</div></div>
+    <div class="result-cell"><div class="val" id="res-margin">0%</div><div class="lbl">Margin</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="menu" onclick="switchTab(this,'menu')">Menu Items</button>
+    <button class="tab" data-tab="ingredients" onclick="switchTab(this,'ingredients')">Ingredients</button>
+    <button class="tab" data-tab="shopping" onclick="switchTab(this,'shopping')">Shopping List</button>
+    <button class="tab" data-tab="misc" onclick="switchTab(this,'misc')">Misc Expenses</button>
+  </div>
+
+  <div id="tab-menu" class="tab-panel active">
+    <div class="card">
+      <div class="card-header">&#127836; Menu Items <span class="tag">prices · mix · links</span></div>
+      <div class="card-body">
+        <table>
+          <thead><tr>
+            <th style="min-width:150px;">Item</th>
+            <th>Price (&#163;)</th>
+            <th>% Orders</th>
+            <th>Portions</th>
+            <th>Cost/Portion</th>
+            <th>Revenue</th>
+            <th>Profit</th>
+            <th>Linked Ingredients</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="menuBody"></tbody>
+        </table>
+        <button class="btn btn-add" onclick="addMenuItem()">+ Add Item</button>
+        <p class="notice">% of orders should total 100. Click "+ Link" on any row to attach ingredients.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-ingredients" class="tab-panel">
+    <div class="card">
+      <div class="card-header">&#127807; Ingredients <span class="tag">costs · ratios · linked dishes</span></div>
+      <div class="card-body">
+        <table>
+          <thead><tr>
+            <th>Ingredient</th>
+            <th>Unit</th>
+            <th>Cost/Unit (&#163;)</th>
+            <th>Portions/Unit</th>
+            <th>Cost/Portion</th>
+            <th>Units Needed</th>
+            <th>Total Cost</th>
+            <th>Used In</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="ingredientBody"></tbody>
+        </table>
+        <button class="btn btn-add" onclick="addIngredient()">+ Add Ingredient</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-shopping" class="tab-panel">
+    <div class="card">
+      <div class="card-header">&#128722; Shopping List <span class="tag">for this shift</span>
+        <button class="btn" style="margin-left:auto;border-color:var(--border);color:var(--border);font-size:0.6rem;padding:0.2rem 0.6rem;" onclick="clearShoppingTicks()">Clear ticks</button>
+      </div>
+      <div class="card-body">
+        <div class="shop-progress">
+          <span id="shopProgressLabel">0 of 0 bought</span>
+          <div class="shop-progress-bar"><div class="shop-progress-fill" id="shopProgressFill" style="width:0%"></div></div>
+        </div>
+        <table>
+          <thead><tr>
+            <th style="width:32px;">&#10003;</th>
+            <th>Ingredient</th>
+            <th>Units</th>
+            <th>Unit</th>
+            <th>Cost/Unit</th>
+            <th>Total Cost</th>
+            <th>Used In</th>
+          </tr></thead>
+          <tbody id="shoppingBody"></tbody>
+          <tfoot>
+            <tr>
+              <td></td>
+              <td colspan="4" style="font-weight:700;text-align:right;padding-top:0.7rem;font-size:0.7rem;letter-spacing:0.05em;text-transform:uppercase;">Total Spend</td>
+              <td style="font-weight:700;color:var(--red);" id="shoppingTotal">&#163;0.00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-misc" class="tab-panel">
+    <div class="card">
+      <div class="card-header">&#128181; Misc Expenses <span class="tag">overheads · fees · packaging</span></div>
+      <div class="card-body">
+        <table>
+          <thead><tr>
+            <th style="min-width:180px;">Expense</th>
+            <th>Category</th>
+            <th>Cost (&#163;)</th>
+            <th>Type</th>
+            <th>Notes</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="miscBody"></tbody>
+        </table>
+        <button class="btn btn-add" onclick="addMiscItem()">+ Add Expense</button>
+        <p class="notice">Type: <b>Per Shift (£)</b> = flat cost per shift · <b>Per Portion (£)</b> = cost × total portions · <b>% of Revenue</b> = e.g. 2% card reader fee applied to total revenue. All reduce your profit.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Hoàn Kiếm shift planner · From Vietnam's tables to yours</footer>
+
+<div class="modal-overlay" id="linkModal">
+  <div class="modal">
+    <h3 id="modalTitle">Link Ingredients</h3>
+    <p class="modal-sub" id="modalSub">Tick which ingredients go into this dish.</p>
+    <div class="modal-list" id="modalList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-confirm" onclick="saveLinks()">Save Links</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs (compat/CDN — no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ── FIREBASE INIT ──
+const firebaseConfig = {
+  apiKey: "AIzaSyAltDMeXRhogxIzzR91lrIe8ZhQQQfRJbI",
+  authDomain: "hoan-kiem-4b88f.firebaseapp.com",
+  projectId: "hoan-kiem-4b88f",
+  storageBucket: "hoan-kiem-4b88f.firebasestorage.app",
+  messagingSenderId: "342299756104",
+  appId: "1:342299756104:web:f9b3265e26a7bd940e3a7d"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const DOC = db.collection('planner').doc('data');
+
+// ── SYNC STATE ──
+let saveTimer = null;
+function setSyncStatus(state) {
+  const dot   = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  if (state === 'saving') { dot.className='sync-dot saving'; label.textContent='Saving...'; }
+  else if (state === 'saved') { dot.className='sync-dot'; label.textContent='All changes saved'; }
+  else if (state === 'error') { dot.className='sync-dot error'; label.textContent='Save failed — check connection'; }
+  else { dot.className='sync-dot'; label.textContent='Connected'; }
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  setSyncStatus('saving');
+  saveTimer = setTimeout(saveToFirebase, 800);
+}
+
+async function saveToFirebase() {
+  try {
+    await DOC.set({
+      shiftHours: getShiftHours(),
+      portionsPerHour: getPortionsPerHour(),
+      menuItems: menuItems,
+      ingredients: ingredients,
+      miscItems: miscItems,
+      nextMenuId: nextMenuId,
+      nextIngId: nextIngId,
+      nextMiscId: nextMiscId,
+      shoppingTicked: shoppingTicked,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    setSyncStatus('saved');
+  } catch(e) {
+    console.error('Save failed:', e);
+    setSyncStatus('error');
+  }
+}
+
+async function loadFromFirebase() {
+  try {
+    const doc = await DOC.get();
+    if (doc.exists) {
+      const d = doc.data();
+      if (d.menuItems)      menuItems      = d.menuItems;
+      if (d.ingredients)    ingredients    = d.ingredients;
+      if (d.nextMenuId)     nextMenuId     = d.nextMenuId;
+      if (d.nextIngId)      nextIngId      = d.nextIngId;
+    if (d.miscItems)      miscItems      = d.miscItems;
+    if (d.nextMiscId)     nextMiscId     = d.nextMiscId;
+    if (d.shoppingTicked) shoppingTicked = d.shoppingTicked;
+      if (d.shiftHours)     document.getElementById('shiftHours').value     = d.shiftHours;
+      if (d.portionsPerHour) document.getElementById('portionsPerHour').value = d.portionsPerHour;
+    }
+    updateAll();
+    setSyncStatus('saved');
+  } catch(e) {
+    console.error('Load failed:', e);
+    setSyncStatus('error');
+    updateAll(); // still render with defaults
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+}
+
+// ── DEFAULT DATA ──
+let menuItems = [
+  { id:1, name:'Lemongrass Chicken + Rice',    price:13, pct:20, linkedIngIds:[4,3,1,7,9,13] },
+  { id:2, name:'Lemongrass Chicken + Noodles', price:13, pct:15, linkedIngIds:[4,2,1,7,9,13] },
+  { id:3, name:'Lemongrass Pork + Rice',        price:13, pct:20, linkedIngIds:[5,3,1,7,9,13] },
+  { id:4, name:'Lemongrass Pork + Noodles',     price:13, pct:15, linkedIngIds:[5,2,1,7,9,13] },
+  { id:5, name:'Fried Chicken Wings',            price:6,  pct:15, linkedIngIds:[6,8,9] },
+  { id:6, name:'Iced Coffee',                    price:3,  pct:5,  linkedIngIds:[10] },
+  { id:7, name:'Lemonade',                       price:3,  pct:5,  linkedIngIds:[11] },
+  { id:8, name:'Tiramisu',                       price:5,  pct:5,  linkedIngIds:[12] },
+];
+let ingredients = [
+  { id:1,  name:'Romaine Lettuce',  unit:'bag',     cost:1.50, portionsPerUnit:5  },
+  { id:2,  name:'Noodles',          unit:'bag',     cost:1.20, portionsPerUnit:10 },
+  { id:3,  name:'Rice',             unit:'bag',     cost:1.00, portionsPerUnit:10 },
+  { id:4,  name:'Chicken',          unit:'kg',      cost:5.00, portionsPerUnit:8  },
+  { id:5,  name:'Pork',             unit:'kg',      cost:4.50, portionsPerUnit:8  },
+  { id:6,  name:'Chicken Wings',    unit:'kg',      cost:4.00, portionsPerUnit:6  },
+  { id:7,  name:'Thai Basil',       unit:'bunch',   cost:0.80, portionsPerUnit:15 },
+  { id:8,  name:'Coriander',        unit:'bunch',   cost:0.60, portionsPerUnit:15 },
+  { id:9,  name:'Spring Onion',     unit:'bunch',   cost:0.50, portionsPerUnit:15 },
+  { id:10, name:'Coffee',           unit:'portion', cost:0.80, portionsPerUnit:1  },
+  { id:11, name:'Lemonade Mix',     unit:'portion', cost:0.50, portionsPerUnit:1  },
+  { id:12, name:'Tiramisu',         unit:'portion', cost:1.50, portionsPerUnit:1  },
+  { id:13, name:'Perilla',          unit:'bunch',   cost:0.70, portionsPerUnit:15 },
+];
+let nextMenuId = 9, nextIngId = 14;
+let miscItems = [
+  { id:1, name:'Market Pitch Fee',     category:'Venue',      cost:40,   type:'perShift'   },
+  { id:2, name:'Packaging & Boxes',    category:'Packaging',  cost:0.30, type:'perPortion' },
+  { id:3, name:'Napkins & Cutlery',    category:'Packaging',  cost:0.10, type:'perPortion' },
+  { id:4, name:'Gas Canister',         category:'Equipment',  cost:8,    type:'perShift'   },
+  { id:5, name:'Card Reader Fee',      category:'Fees',       cost:2,    type:'pctRevenue', notes:'2% of revenue' },
+];
+let nextMiscId = 6;
+let shoppingTicked = {}; // ingId -> bool
+let modalTargetId = null, modalTempLinks = [];
+
+// ── HELPERS ──
+const getShiftHours      = () => parseFloat(document.getElementById('shiftHours').value) || 6;
+const getPortionsPerHour = () => parseFloat(document.getElementById('portionsPerHour').value) || 13;
+const getTotalPortions   = () => Math.round(getShiftHours() * getPortionsPerHour());
+const fmt  = n => '&#163;' + n.toFixed(2);
+const fmtP = n => n.toFixed(1) + '%';
+const esc  = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const ingCostPP   = ing  => ing.portionsPerUnit > 0 ? ing.cost / ing.portionsPerUnit : 0;
+const itemCostPP  = item => item.linkedIngIds.reduce((s,id)=>{ const i=ingredients.find(x=>x.id===id); return i?s+ingCostPP(i):s; },0);
+const itemPortions= item => Math.round(getTotalPortions() * item.pct / 100);
+const usedInNames = ingId => menuItems.filter(m=>m.linkedIngIds.includes(ingId)).map(m=>m.name);
+
+// ── RENDER MENU ──
+function renderMenu() {
+  const tbody = document.getElementById('menuBody');
+  tbody.innerHTML = '';
+  let totalPct=0, totalRev=0, totalProfit=0;
+  menuItems.forEach(item => {
+    totalPct += item.pct;
+    const portions = itemPortions(item);
+    const costPP   = itemCostPP(item);
+    const rev      = portions * item.price;
+    const profit   = rev - costPP * portions;
+    totalRev    += rev;
+    totalProfit += profit;
+    const chipsHtml = item.linkedIngIds.map(id => {
+      const ing = ingredients.find(x=>x.id===id);
+      return ing ? `<span class="chip">${esc(ing.name)}<button class="chip-del" onclick="unlinkIng(${item.id},${id})" title="Remove">&#215;</button></span>` : '';
+    }).join('');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" value="${esc(item.name)}" onchange="updateMenu(${item.id},'name',this.value)" style="min-width:150px;"></td>
+      <td><input type="number" value="${item.price}" min="0" step="0.50" onchange="updateMenu(${item.id},'price',+this.value)" style="width:55px;"></td>
+      <td style="white-space:nowrap;"><input type="number" value="${item.pct}" min="0" max="100" step="1" onchange="updateMenu(${item.id},'pct',+this.value)" style="width:45px;">%</td>
+      <td class="calc-cell">${portions}</td>
+      <td class="calc-cell ${costPP>0?'highlight':''}">${fmt(costPP)}</td>
+      <td class="calc-cell highlight">${fmt(rev)}</td>
+      <td class="${profit>=0?'pos':'neg'}">${fmt(profit)}</td>
+      <td><div class="link-chips">${chipsHtml}<button class="chip-link-btn" onclick="openModal(${item.id})">+ Link</button></div></td>
+      <td><button class="btn btn-del" onclick="removeMenuItem(${item.id})">&#10005;</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  const total = getTotalPortions();
+  const tr = document.createElement('tr');
+  tr.style.background = '#fdf7ee';
+  tr.innerHTML = `
+    <td style="font-weight:700;font-size:0.7rem;text-transform:uppercase;">TOTAL</td><td></td>
+    <td class="${Math.abs(totalPct-100)<0.5?'pos':'neg'}" style="font-weight:700;">${totalPct.toFixed(0)}%</td>
+    <td class="calc-cell" style="font-weight:700;">${total}</td><td></td>
+    <td class="calc-cell highlight" style="font-weight:700;">${fmt(totalRev)}</td>
+    <td class="${totalProfit>=0?'pos':'neg'}">${fmt(totalProfit)}</td>
+    <td colspan="2"></td>
+  `;
+  tbody.appendChild(tr);
+  return { revenue: totalRev, profit: totalProfit };
+}
+
+// ── RENDER INGREDIENTS ──
+function renderIngredients() {
+  const tbody = document.getElementById('ingredientBody');
+  tbody.innerHTML = '';
+  let totalCost = 0;
+  ingredients.forEach(ing => {
+    const cpp = ingCostPP(ing);
+    const linkedItems = menuItems.filter(m => m.linkedIngIds.includes(ing.id));
+    const portionsNeeded = linkedItems.reduce((s,m) => s + itemPortions(m), 0);
+    const unitsNeeded = portionsNeeded > 0 ? Math.ceil(portionsNeeded / ing.portionsPerUnit) : 0;
+    const cost = unitsNeeded * ing.cost;
+    totalCost += cost;
+    const usedIn = usedInNames(ing.id);
+    const usedHtml = usedIn.length
+      ? usedIn.map(n=>`<span class="chip" style="cursor:default;">${esc(n)}</span>`).join('')
+      : `<span style="color:var(--border);font-size:0.62rem;font-style:italic;">Not linked</span>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" value="${esc(ing.name)}" onchange="updateIng(${ing.id},'name',this.value)" style="min-width:130px;"></td>
+      <td><input type="text" value="${esc(ing.unit)}" onchange="updateIng(${ing.id},'unit',this.value)" style="width:65px;"></td>
+      <td><input type="number" value="${ing.cost}" min="0" step="0.10" onchange="updateIng(${ing.id},'cost',+this.value)" style="width:60px;"></td>
+      <td><input type="number" value="${ing.portionsPerUnit}" min="1" step="1" onchange="updateIng(${ing.id},'portionsPerUnit',+this.value)" style="width:60px;"></td>
+      <td class="calc-cell">${fmt(cpp)}</td>
+      <td class="calc-cell">${unitsNeeded}</td>
+      <td class="calc-cell highlight">${fmt(cost)}</td>
+      <td><div class="link-chips">${usedHtml}</div></td>
+      <td><button class="btn btn-del" onclick="removeIngredient(${ing.id})">&#10005;</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  const tr = document.createElement('tr');
+  tr.style.background = '#fdf7ee';
+  tr.innerHTML = `
+    <td colspan="6" style="font-weight:700;font-size:0.7rem;text-transform:uppercase;text-align:right;">Total Ingredient Cost</td>
+    <td class="calc-cell highlight" style="font-weight:700;">${fmt(totalCost)}</td>
+    <td colspan="2"></td>
+  `;
+  tbody.appendChild(tr);
+  return totalCost;
+}
+
+
+// ── RENDER MISC ──
+function renderMisc(revenue) {
+  const tbody = document.getElementById('miscBody');
+  tbody.innerHTML = '';
+  const total = getTotalPortions();
+  const rev = revenue || 0;
+  let totalMisc = 0;
+  miscItems.forEach(mis => {
+    let effectiveCost = mis.cost;
+    if (mis.type === 'perPortion') effectiveCost = mis.cost * total;
+    else if (mis.type === 'pctRevenue') effectiveCost = (mis.cost / 100) * rev;
+    totalMisc += effectiveCost;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" value="${esc(mis.name)}" onchange="updateMisc(${mis.id},'name',this.value)" style="min-width:160px;"></td>
+      <td><input type="text" value="${esc(mis.category||'')}" onchange="updateMisc(${mis.id},'category',this.value)" style="width:100px;"></td>
+      <td style="white-space:nowrap;">
+        <input type="number" value="${mis.cost}" min="0" step="0.01" onchange="updateMisc(${mis.id},'cost',+this.value)" style="width:60px;">
+        ${mis.type==='pctRevenue'?'%':'£'}
+        <span style="color:var(--mid);font-size:0.65rem;">(=£${effectiveCost.toFixed(2)})</span>
+      </td>
+      <td>
+        <select onchange="updateMisc(${mis.id},'type',this.value)" style="font-family:var(--font-body);font-size:0.75rem;border:1px solid var(--border);background:var(--cream);padding:0.25rem 0.35rem;border-radius:2px;outline:none;color:var(--dark);">
+          <option value="perShift" ${mis.type==='perShift'?'selected':''}>Per Shift (£)</option>
+          <option value="perPortion" ${mis.type==='perPortion'?'selected':''}>Per Portion (£)</option>
+          <option value="pctRevenue" ${mis.type==='pctRevenue'?'selected':''}>% of Revenue</option>
+        </select>
+      </td>
+      <td><input type="text" value="${esc(mis.notes||'')}" onchange="updateMisc(${mis.id},'notes',this.value)" style="min-width:120px;" placeholder="optional note"></td>
+      <td><button class="btn btn-del" onclick="removeMiscItem(${mis.id})">&#10005;</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  // Totals row
+  const tr = document.createElement('tr');
+  tr.style.background = '#fdf7ee';
+  tr.innerHTML = `
+    <td colspan="2" style="font-weight:700;font-size:0.7rem;text-transform:uppercase;text-align:right;">Total Misc Cost this shift</td>
+    <td colspan="2" class="calc-cell highlight" style="font-weight:700;">£${totalMisc.toFixed(2)}</td>
+    <td colspan="3"></td>
+  `;
+  tbody.appendChild(tr);
+  return totalMisc;
+}
+
+// ── RENDER SHOPPING ──
+function renderShopping() {
+  const tbody = document.getElementById('shoppingBody');
+  tbody.innerHTML = '';
+  let totalCost = 0;
+  // Build rows, split into pending and bought
+  const pending = [], bought = [];
+  ingredients.forEach(ing => {
+    const linkedItems = menuItems.filter(m => m.linkedIngIds.includes(ing.id));
+    const portionsNeeded = linkedItems.reduce((s,m) => s + itemPortions(m), 0);
+    if (portionsNeeded === 0) return;
+    const unitsNeeded = Math.ceil(portionsNeeded / ing.portionsPerUnit);
+    const cost = unitsNeeded * ing.cost;
+    totalCost += cost;
+    const isBought = !!shoppingTicked[ing.id];
+    const row = { ing, unitsNeeded, cost, isBought };
+    isBought ? bought.push(row) : pending.push(row);
+  });
+  const allRows = [...pending, ...bought];
+  allRows.forEach(({ ing, unitsNeeded, cost, isBought }) => {
+    const tr = document.createElement('tr');
+    tr.className = 'shop-row' + (isBought ? ' bought' : '');
+    tr.innerHTML = `
+      <td style="text-align:center;">
+        <input type="checkbox" class="shop-check" ${isBought?'checked':''} onchange="toggleShoppingTick(${ing.id},this.checked)">
+      </td>
+      <td style="font-weight:500;">${esc(ing.name)}</td>
+      <td style="font-weight:700;">${unitsNeeded}</td>
+      <td>${esc(ing.unit)}</td>
+      <td>${fmt(ing.cost).replace('&#163;','£')}</td>
+      <td class="calc-cell highlight">${fmt(cost).replace('&#163;','£')}</td>
+      <td style="font-size:0.68rem;color:var(--mid);">${usedInNames(ing.id).join(', ')}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  // Progress bar
+  const totalItems = allRows.length;
+  const boughtCount = bought.length;
+  document.getElementById('shopProgressLabel').textContent = `${boughtCount} of ${totalItems} bought`;
+  document.getElementById('shopProgressFill').style.width = totalItems > 0 ? (boughtCount/totalItems*100)+'%' : '0%';
+  document.getElementById('shoppingTotal').textContent = '£' + totalCost.toFixed(2);
+  return totalCost;
+}
+function toggleShoppingTick(ingId, checked) {
+  shoppingTicked[ingId] = checked;
+  renderShopping();
+  scheduleSave();
+}
+function clearShoppingTicks() {
+  shoppingTicked = {};
+  renderShopping();
+  scheduleSave();
+}
+
+// ── MASTER UPDATE ──
+function updateAll() {
+  const total = getTotalPortions();
+  document.getElementById('totalPortions').value = total;
+  document.getElementById('res-portions').textContent = total;
+  const { revenue, profit } = renderMenu();
+  const cost = renderIngredients();
+  renderShopping();
+  const miscCost = renderMisc(revenue);
+  const totalProfit = profit - miscCost;
+  const margin = revenue > 0 ? (totalProfit / revenue * 100) : 0;
+  document.getElementById('res-revenue').textContent = '£' + revenue.toFixed(2);
+  document.getElementById('res-cost').textContent    = '£' + cost.toFixed(2);
+  document.getElementById('res-misc').textContent    = '£' + miscCost.toFixed(2);
+  document.getElementById('res-profit').textContent  = '£' + totalProfit.toFixed(2);
+  document.getElementById('res-margin').textContent  = fmtP(margin);
+  document.getElementById('res-profit').parentElement.className = 'result-cell ' + (totalProfit >= 0 ? 'profit' : 'loss');
+}
+
+// ── MUTATIONS (all trigger scheduleSave) ──
+function updateMenu(id, field, val) { const m=menuItems.find(x=>x.id===id); if(m) m[field]=val; updateAll(); scheduleSave(); }
+function removeMenuItem(id) { menuItems=menuItems.filter(m=>m.id!==id); updateAll(); scheduleSave(); }
+function addMenuItem() { menuItems.push({id:nextMenuId++,name:'New Item',price:0,pct:0,linkedIngIds:[]}); updateAll(); scheduleSave(); }
+function updateIng(id, field, val) { const i=ingredients.find(x=>x.id===id); if(i) i[field]=val; updateAll(); scheduleSave(); }
+function removeIngredient(id) { menuItems.forEach(m=>{ m.linkedIngIds=m.linkedIngIds.filter(x=>x!==id); }); ingredients=ingredients.filter(i=>i.id!==id); updateAll(); scheduleSave(); }
+function addIngredient() { ingredients.push({id:nextIngId++,name:'New Ingredient',unit:'unit',cost:0,portionsPerUnit:1}); updateAll(); scheduleSave(); document.querySelector('[data-tab="ingredients"]').click(); }
+function updateMisc(id, field, val) { const m=miscItems.find(x=>x.id===id); if(m) m[field]=val; updateAll(); scheduleSave(); }
+function removeMiscItem(id) { miscItems=miscItems.filter(m=>m.id!==id); updateAll(); scheduleSave(); }
+function addMiscItem() { miscItems.push({id:nextMiscId++,name:'New Expense',category:'Other',cost:0,type:'perShift',notes:''}); updateAll(); scheduleSave(); document.querySelector('[data-tab="misc"]').click(); }
+function unlinkIng(menuId, ingId) { const m=menuItems.find(x=>x.id===menuId); if(m) m.linkedIngIds=m.linkedIngIds.filter(x=>x!==ingId); updateAll(); scheduleSave(); }
+
+// ── MODAL ──
+function openModal(menuId) {
+  modalTargetId = menuId;
+  const item = menuItems.find(m=>m.id===menuId);
+  modalTempLinks = [...item.linkedIngIds];
+  document.getElementById('modalTitle').textContent = 'Link → ' + item.name;
+  updateModalSub();
+  const list = document.getElementById('modalList');
+  list.innerHTML = '';
+  ingredients.forEach(ing => {
+    const checked = modalTempLinks.includes(ing.id);
+    const div = document.createElement('div');
+    div.className = 'modal-item' + (checked?' selected':'');
+    div.dataset.ingId = ing.id;
+    div.innerHTML = `<input type="checkbox" id="mc_${ing.id}" ${checked?'checked':''}>
+      <span class="modal-item-name">${esc(ing.name)}</span>
+      <span class="modal-item-cost">${fmt(ingCostPP(ing)).replace('&#163;','£')}/portion</span>`;
+    div.addEventListener('click', e => { if(e.target.tagName==='INPUT') return; const cb=div.querySelector('input'); cb.checked=!cb.checked; handleModalCheck(ing.id,cb.checked,div); });
+    div.querySelector('input').addEventListener('change', function() { handleModalCheck(ing.id,this.checked,div); });
+    list.appendChild(div);
+  });
+  document.getElementById('linkModal').classList.add('open');
+}
+function handleModalCheck(ingId, checked, divEl) {
+  if(checked){ if(!modalTempLinks.includes(ingId)) modalTempLinks.push(ingId); }
+  else { modalTempLinks=modalTempLinks.filter(x=>x!==ingId); }
+  divEl.className = 'modal-item' + (checked?' selected':'');
+  updateModalSub();
+}
+function updateModalSub() {
+  const totalCpp = modalTempLinks.reduce((s,id)=>{ const i=ingredients.find(x=>x.id===id); return i?s+ingCostPP(i):s; },0);
+  document.getElementById('modalSub').textContent = modalTempLinks.length===0
+    ? 'No ingredients linked yet.'
+    : `${modalTempLinks.length} linked · Combined cost: £${totalCpp.toFixed(2)}/portion`;
+}
+function saveLinks() { const m=menuItems.find(x=>x.id===modalTargetId); if(m) m.linkedIngIds=[...modalTempLinks]; closeModal(); updateAll(); scheduleSave(); }
+function closeModal() { document.getElementById('linkModal').classList.remove('open'); modalTargetId=null; modalTempLinks=[]; }
+document.getElementById('linkModal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeModal(); });
+
+// ── TABS ──
+function switchTab(btn, name) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── SHIFT SETTINGS CHANGE ──
+document.getElementById('shiftHours').addEventListener('input', function() { updateAll(); scheduleSave(); });
+document.getElementById('portionsPerHour').addEventListener('input', function() { updateAll(); scheduleSave(); });
+
+// ── EXPORT TO EXCEL ──
+function exportToExcel() {
+  const hours = getShiftHours();
+  const pph   = getPortionsPerHour();
+  const rows  = [];
+  rows.push(['"HOÀN KIẾM SHIFT PLANNER"']);
+  rows.push(['"Generated:"', '"' + new Date().toLocaleString() + '"']);
+  rows.push([]);
+  rows.push(['"=== SHIFT SETTINGS ==="']);
+  rows.push(['"Shift Hours"', hours]);
+  rows.push(['"Portions Per Hour"', pph]);
+  rows.push(['"Total Portions"', '=B5*B6']);
+  rows.push([]);
+  rows.push(['"=== INGREDIENTS ==="']);
+  rows.push(['"Ingredient"','"Unit"','"Cost/Unit (£)"','"Portions/Unit"','"Cost/Portion"','"Units Needed"','"Total Cost"']);
+  const ingStartRow = rows.length + 1;
+  ingredients.forEach((ing, i) => {
+    const linkedItems = menuItems.filter(m => m.linkedIngIds.includes(ing.id));
+    const portionsNeeded = linkedItems.reduce((s,m) => s + itemPortions(m), 0);
+    const unitsNeeded = portionsNeeded > 0 ? Math.ceil(portionsNeeded / ing.portionsPerUnit) : 0;
+    const rn = ingStartRow + i;
+    rows.push(['"'+ing.name+'"', '"'+ing.unit+'"', ing.cost, ing.portionsPerUnit, '=C'+rn+'/D'+rn, unitsNeeded, '=F'+rn+'*C'+rn]);
+  });
+  const ingEndRow = ingStartRow + ingredients.length - 1;
+  rows.push(['"TOTAL INGREDIENT COST"','','','','','','=SUM(G'+ingStartRow+':G'+ingEndRow+')']);
+  rows.push([]);
+  rows.push(['"=== MENU ITEMS ==="']);
+  rows.push(['"Item"','"Price (£)"','"% of Orders"','"Est. Portions"','"Ing. Cost/Portion"','"Revenue"','"Profit"']);
+  const menuStartRow = rows.length + 1;
+  menuItems.forEach((item, i) => {
+    const costPP = itemCostPP(item);
+    const rn = menuStartRow + i;
+    rows.push(['"'+item.name+'"', item.price, item.pct/100, '=B7*C'+rn, costPP.toFixed(4), '=B'+rn+'*D'+rn, '=F'+rn+'-(E'+rn+'*D'+rn+')']);
+  });
+  const menuEndRow = menuStartRow + menuItems.length - 1;
+  rows.push(['"TOTALS"','','=SUM(C'+menuStartRow+':C'+menuEndRow+')','','','=SUM(F'+menuStartRow+':F'+menuEndRow+')','=SUM(G'+menuStartRow+':G'+menuEndRow+')']);
+  rows.push([]);
+  rows.push(['"=== SHOPPING LIST ==="']);
+  rows.push(['"Ingredient"','"Units Needed"','"Unit"','"Cost/Unit (£)"','"Total Cost"','"Used In"']);
+  ingredients.forEach(ing => {
+    const linkedItems = menuItems.filter(m => m.linkedIngIds.includes(ing.id));
+    const portionsNeeded = linkedItems.reduce((s,m) => s + itemPortions(m), 0);
+    if (portionsNeeded === 0) return;
+    const unitsNeeded = Math.ceil(portionsNeeded / ing.portionsPerUnit);
+    rows.push(['"'+ing.name+'"', unitsNeeded, '"'+ing.unit+'"', ing.cost, unitsNeeded*ing.cost, '"'+usedInNames(ing.id).join(', ')+'"']);
+  });
+  const csv = rows.map(r => r.join(',')).join('\r\n');
+  const encoded = encodeURIComponent('\uFEFF' + csv);
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encoded;
+  a.download = 'hoan-kiem-shift-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// ── IMPORT FROM CSV ──
+function importFromCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result.replace(/^\uFEFF/, '');
+      const lines = text.split(/\r?\n/);
+      function parseRow(line) {
+        const result = []; let current = '', inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch==='"' && inQuotes && line[i+1]==='"') { current+='"'; i++; }
+          else if (ch==='"') { inQuotes=!inQuotes; }
+          else if (ch===',' && !inQuotes) { result.push(current.replace(/^"|"$/g,'')); current=''; }
+          else { current+=ch; }
+        }
+        result.push(current.replace(/^"|"$/g,''));
+        return result;
+      }
+      let ingSection=-1, menuSection=-1;
+      lines.forEach((l,i) => {
+        if (l.includes('=== INGREDIENTS')) ingSection=i;
+        if (l.includes('=== MENU ITEMS')) menuSection=i;
+      });
+      lines.forEach(l => {
+        const r = parseRow(l);
+        if (r[0]==='Shift Hours' && r[1]) document.getElementById('shiftHours').value = parseFloat(r[1])||6;
+        if (r[0]==='Portions Per Hour' && r[1]) document.getElementById('portionsPerHour').value = parseFloat(r[1])||13;
+      });
+      if (ingSection >= 0) {
+        const newIngs = []; let id = 1;
+        for (let i = ingSection+2; i < lines.length; i++) {
+          const r = parseRow(lines[i]);
+          if (!r[0] || r[0].includes('===') || r[0]==='TOTAL INGREDIENT COST') break;
+          if (r[0]==='Ingredient') continue;
+          newIngs.push({ id:id++, name:r[0], unit:r[1]||'unit', cost:parseFloat(r[2])||0, portionsPerUnit:parseFloat(r[3])||1 });
+        }
+        if (newIngs.length>0) { ingredients=newIngs; nextIngId=id; }
+      }
+      if (menuSection >= 0) {
+        const newMenu = []; let id = 1;
+        for (let i = menuSection+2; i < lines.length; i++) {
+          const r = parseRow(lines[i]);
+          if (!r[0] || r[0].includes('===') || r[0]==='TOTALS') break;
+          if (r[0]==='Item') continue;
+          const pct = Math.round((parseFloat(r[2])||0)*100);
+          newMenu.push({ id:id++, name:r[0], price:parseFloat(r[1])||0, pct, linkedIngIds:[] });
+        }
+        if (newMenu.length>0) { menuItems=newMenu; nextMenuId=id; }
+      }
+      updateAll(); scheduleSave();
+      alert('Imported successfully!');
+    } catch(err) {
+      alert('Import failed. Please use a file exported from this planner.');
+      console.error(err);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── START: load from Firebase ──
+loadFromFirebase();
+</script>
+</body>
+</html>
