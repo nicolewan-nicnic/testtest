@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIVESYNC — Angel Investor Dataroom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #0036db;
+      --white: #ffffff;
+      --black: #252525;
+      --red: #e52626;
+      --panel: #f4f6fb;
+      --border: #d4dae8;
+      --text-muted: rgba(37,37,37,0.45);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      font-weight: 400;
+      color: var(--black);
+      background: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .top-bar {
+      background: var(--blue);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(24px, 5vw, 64px);
+      height: 52px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .livesync-wordmark {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .accent-dot { color: var(--red); }
+    .top-bar-label {
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      border-left: 1px solid rgba(255,255,255,0.25);
+      padding-left: 10px;
+      margin-left: 2px;
+    }
+    .top-bar-right {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.55;
+    }
+
+    /* ── Layout ── */
+    .page-wrap {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 52px);
+    }
+
+    /* ── Sidebar nav ── */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 36px 0;
+      position: sticky;
+      top: 52px;
+      height: calc(100vh - 52px);
+      overflow-y: auto;
+    }
+    .sidebar-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 24px;
+      margin-bottom: 14px;
+    }
+    .nav-item {
+      display: block;
+      padding: 8px 24px;
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--black);
+      text-decoration: none;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.15s ease;
+      line-height: 1.4;
+    }
+    .nav-item:hover {
+      background: var(--panel);
+      color: var(--blue);
+      border-left-color: var(--blue);
+    }
+    .nav-item.active {
+      color: var(--blue);
+      border-left-color: var(--blue);
+      font-weight: 700;
+      background: var(--panel);
+    }
+    .nav-emoji { margin-right: 6px; }
+
+    /* ── Main content ── */
+    .main {
+      padding: clamp(32px, 4vw, 56px) clamp(32px, 5vw, 72px);
+      max-width: 900px;
+    }
+
+    .page-header {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h1 {
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 700;
+      color: var(--black);
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .page-header p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+    .header-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .meta-chip {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 12px;
+    }
+
+    /* ── Loading / error states ── */
+    .state-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 40px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .state-box .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state-box p { font-size: 0.85rem; line-height: 1.6; }
+    .state-box .setup-hint {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      text-align: left;
+      max-width: 480px;
+      color: var(--black);
+      line-height: 1.7;
+    }
+    .state-box .setup-hint code {
+      font-family: monospace;
+      font-size: 0.75rem;
+      background: rgba(0,54,219,0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--blue);
+    }
+
+    /* ── Section group ── */
+    .section-group {
+      margin-bottom: 52px;
+      scroll-margin-top: 72px;
+    }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .section-title {
+      font-size: clamp(1rem, 2vw, 1.1rem);
+      font-weight: 700;
+      color: var(--black);
+    }
+    .section-number {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .section-rule {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0 0 0;
+    }
+
+    /* ── Item rows ── */
+    .item-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: start;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s ease;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row:hover { background: rgba(244,246,251,0.5); margin: 0 -16px; padding: 16px 16px; }
+
+    .item-main {}
+    .item-number {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+      text-transform: uppercase;
+    }
+    .item-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--black);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+    .item-description {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      max-width: 55ch;
+    }
+
+    .item-date {
+      font-family: Verdana, sans-serif;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      padding-top: 2px;
+      min-width: 72px;
+      text-align: right;
+    }
+
+    .item-link-col {
+      display: flex;
+      align-items: flex-start;
+      padding-top: 1px;
+    }
+    .item-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: rgba(0,54,219,0.06);
+      border: 1px solid rgba(0,54,219,0.2);
+      border-radius: 8px;
+      padding: 6px 12px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .item-btn:hover {
+      background: var(--blue);
+      color: var(--white);
+      border-color: var(--blue);
+    }
+    .item-btn svg {
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    .bottom-bar {
+      background: var(--blue);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px clamp(24px, 5vw, 64px);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-top: 40px;
+    }
+    .bottom-bar .livesync-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bottom-bar .right {
+      font-weight: 400;
+      opacity: 0.5;
+      font-size: 0.65rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 720px) {
+      .page-wrap { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .item-row { grid-template-columns: 1fr; }
+      .item-date { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="livesync-wordmark"><span class="accent-dot">·</span> LIVESYNC</span>
+      <span class="top-bar-label">Angel Investor Dataroom</span>
+    </div>
+    <div class="top-bar-right" id="last-refresh">Loading…</div>
+  </div>
+
+  <div class="page-wrap">
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-label">Sections</div>
+      <div id="nav-links">
+        <!-- Populated by JS -->
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="page-header">
+        <h1>Due Diligence Dataroom</h1>
+        <p>All materials for angel investor review. Data is pulled live from the source sheet — refresh the page to see the latest.</p>
+        <div class="header-meta">
+          <span class="meta-chip" id="item-count">—</span>
+          <span class="meta-chip">Angel Version</span>
+          <span class="meta-chip">Confidential</span>
+        </div>
+      </div>
+
+      <div id="content">
+        <div class="state-box">
+          <div class="spinner"></div>
+          <p>Loading dataroom…</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <div class="bottom-bar">
+    <div class="livesync-logo">
+      <span class="accent-dot">·</span>&nbsp;LIVESYNC
+    </div>
+    <span class="right">Confidential — Angel Investor Use Only</span>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────────────────
+    //  CONFIGURATION — paste your published CSV URL here
+    //  How to get it:
+    //    1. Open the Google Sheet
+    //    2. File → Share → Publish to web
+    //    3. Select the "Angel Version" tab, format = CSV
+    //    4. Click Publish and copy the URL
+    //    5. Paste it below, replacing the placeholder
+    // ─────────────────────────────────────────────────────────
+    const SHEET_CSV_URL = 'YOUR_GOOGLE_SHEET_CSV_URL_HERE';
+
+    // ─────────────────────────────────────────────────────────
+    //  If you haven't set up the URL yet, we use sample data
+    //  so you can preview the layout immediately.
+    // ─────────────────────────────────────────────────────────
+    const SAMPLE_DATA = [
+      { item: '1.0 🔑 Investment Info', link: '', date: '' },
+      { item: '1.1 Pitch Deck (latest version)', link: 'Click to access latest Pitch Deck here', date: '18/03/2026' },
+      { item: '1.2 Executive Summary', link: 'LIVESYNC aims to be the experience partner powering the gaming broadcast revolution.', date: '16/04/2026' },
+      { item: '1.3 One-Page Teaser', link: 'Click to access here', date: '16/04/2026' },
+      { item: '1.4 Company Overview (1-2 Page)', link: '', date: '16/04/2026' },
+      { item: '1.5 Financial Model (latest version)', link: 'LiveSync Finance Plan', date: '16/04/2026' },
+      { item: '1.6 Fundraising Docs (materials used in current round)', link: '', date: '16/04/2026' },
+      { item: '1.7 SEIS / EIS Certificates', link: '', date: '' },
+      { item: '2.0 👥 Founders & Shareholding', link: '', date: '' },
+      { item: '2.1 Shareholders\' Agreement', link: 'Shareholder Agreement Amended VER3.3.docx', date: '16/04/2026' },
+      { item: '2.2 Board / Shareholder Resolutions', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '2.3 Cap Table, Google Sheet Available Upon Request', link: '2.3 Cap Table.pdf', date: '16/04/2026' },
+      { item: '2.4 Director & Officer Details (addresses, IDs)', link: '5 - Employees', date: '' },
+      { item: '3.0 🏢 Corporate Info', link: '', date: '' },
+      { item: '3.1 Articles of Association', link: 'LiveSync Articles Of Association VER1.2.docx', date: '16/04/2026' },
+      { item: '3.2 Certificate of Incorporation', link: 'Certificate of Incorporation - 17131850_newinc_2026-04-01.pdf', date: '17/04/2026' },
+      { item: '3.3 Company Structure', link: '', date: '16/04/2026' },
+      { item: '3.4 Outstanding Options / Convertible Instruments', link: '', date: '16/04/2026' },
+      { item: '3.5 Board Packs & Past Board Minutes', link: 'Not applicable at this point in time', date: '' },
+      { item: '4.0 💳 Banking & Finance', link: '', date: '' },
+      { item: '4.1 Bank Accounts (details & balances)', link: '', date: '16/04/2026' },
+      { item: '4.2 Loan / Debt Agreements', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '4.3 Credit Facilities & Overdrafts', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '4.4 Security Agreements or Charges', link: 'Not applicable at this point in time', date: '' },
+      { item: '5.0 📜 Legal & Contracts', link: '', date: '' },
+      { item: '5.1 Major Customer Contracts', link: '1 - Legal Documents', date: '17/04/2026' },
+      { item: '5.2 Key Supplier / Partner Agreements', link: '1 - Legal Documents', date: '16/04/2026' },
+      { item: '5.3 Service Agreements (IT, SaaS, HR)', link: '', date: '16/04/2026' },
+      { item: '5.4 Insurance Policies', link: '', date: '' },
+      { item: '6.0 👩‍💼 Employees & HR', link: '', date: '' },
+      { item: '6.1 Employment Contracts (standard + exec)', link: '', date: '16/04/2026' },
+      { item: '6.2 Employee Handbook / HR Policies', link: '', date: '16/04/2026' },
+      { item: '6.3 Option Agreements & ESOP Plan Rules', link: 'Not applicable at this point in time', date: '17/04/2026' },
+      { item: '6.4 Pension & Benefits Schemes', link: '', date: '' },
+      { item: '7.0 📊 Financial & Tax', link: '', date: '' },
+      { item: '7.1 Historical Financial Statements (last 3 years)', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '7.2 Latest Management Accounts', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '7.3 Tax Returns & HMRC Correspondence', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '7.4 VAT, PAYE, NI', link: 'Not applicable at this point in time', date: '' },
+      { item: '8.0 🧑‍💻 IP & Tech', link: '', date: '' },
+      { item: '8.1 IP Assignment Agreements (founders, staff, contractors)', link: '', date: '16/04/2026' },
+      { item: '8.2 Patents, Trademarks, Copyrights', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '8.3 IP & Proprietary Tech', link: '', date: '16/04/2026' },
+      { item: '8.4 Technology overview', link: 'LIVESYNC System Architecture', date: '' },
+      { item: '9.0 📈 Commercial', link: '', date: '' },
+      { item: '9.1 CRM Export / Customer Pipeline', link: '', date: '16/04/2026' },
+      { item: '9.2 Top 10 Customers (with revenue split)', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '9.3 Churn & Retention Metrics', link: 'Awaiting Pilot', date: '16/04/2026' },
+      { item: '9.4 KPI & OKR Dashboards', link: '', date: '16/04/2026' },
+      { item: '9.5 Pricing Model Documentation', link: '', date: '' },
+      { item: '10.0 🌍 Compliance & Regulatory', link: '', date: '' },
+      { item: '10.1 GDPR & Data Protection Policies', link: '', date: '16/04/2026' },
+      { item: '10.2 FCA or Industry-Specific Approvals', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '10.3 Anti-Bribery / AML Policies', link: 'Not applicable at this point in time', date: '16/04/2026' },
+      { item: '10.4 Health & Safety (if relevant)', link: 'Not applicable at this point in time', date: '' },
+    ];
+
+    // ── CSV parser (handles quoted fields with commas/newlines) ──
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i], next = text[i + 1];
+        if (inQuotes) {
+          if (ch === '"' && next === '"') { field += '"'; i++; }
+          else if (ch === '"') { inQuotes = false; }
+          else { field += ch; }
+        } else {
+          if (ch === '"') { inQuotes = true; }
+          else if (ch === ',') { row.push(field.trim()); field = ''; }
+          else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+            if (ch === '\r') i++;
+            row.push(field.trim()); rows.push(row); row = []; field = '';
+          } else { field += ch; }
+        }
+      }
+      if (field || row.length) { row.push(field.trim()); rows.push(row); }
+      return rows;
+    }
+
+    // ── Row filter: skip blank, dot-only, #REF!, header rows ──
+    function isValidRow(cols) {
+      const item = (cols[0] || '').trim();
+      if (!item) return false;
+      if (item === '.' || /^\.*$/.test(item)) return false;
+      if (item.startsWith('#REF')) return false;
+      if (item.toLowerCase() === 'item') return false; // header row
+      // Skip rows that are just a number with a word like ". General" or ". Product"
+      if (/^\.\s*(general|product)$/i.test(item)) return false;
+      return true;
+    }
+
+    // ── Determine if a row is a section header (e.g. "1.0", "2.0") ──
+    function isSectionHeader(item) {
+      return /^\d+\.0\s/.test(item);
+    }
+
+    // ── Build display data from raw rows ──
+    function buildRows(rawRows) {
+      return rawRows
+        .filter(isValidRow)
+        .map(cols => ({
+          item: (cols[0] || '').trim(),
+          link: (cols[1] || '').trim(),
+          date: (cols[2] || '').trim(),
+        }));
+    }
+
+    // ── Parse item number and name ──
+    function parseItem(item) {
+      const m = item.match(/^(\d+\.\d+)\s+(.*)$/);
+      if (m) return { num: m[1], name: m[2] };
+      return { num: '', name: item };
+    }
+
+    // ── Check if link text looks like a URL or is a named link ──
+    function isURL(s) {
+      return /^https?:\/\//i.test(s);
+    }
+
+    // ── Render everything ──
+    function render(rows, usingLive) {
+      const content = document.getElementById('content');
+      const navLinks = document.getElementById('nav-links');
+      const itemCountEl = document.getElementById('item-count');
+      const refreshEl = document.getElementById('last-refresh');
+
+      // Group into sections
+      const sections = [];
+      let currentSection = null;
+
+      rows.forEach(row => {
+        if (isSectionHeader(row.item)) {
+          currentSection = { header: row, items: [] };
+          sections.push(currentSection);
+        } else if (currentSection) {
+          currentSection.items.push(row);
+        }
+      });
+
+      // Count real items
+      const totalItems = sections.reduce((acc, s) => acc + s.items.length, 0);
+      itemCountEl.textContent = `${totalItems} items`;
+      refreshEl.textContent = usingLive
+        ? `Live · ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+        : 'Preview mode';
+
+      // Build nav
+      navLinks.innerHTML = sections.map(s => {
+        const { num, name } = parseItem(s.header.item);
+        const id = `section-${num.replace('.', '-')}`;
+        return `<a class="nav-item" href="#${id}"><span class="nav-emoji">${extractEmoji(name)}</span>${stripEmoji(name)}</a>`;
+      }).join('');
+
+      // Build content
+      content.innerHTML = sections.map(s => {
+        const { num, name } = parseItem(s.header.item);
+        const id = `section-${num.replace('.', '-')}`;
+        const emoji = extractEmoji(name);
+        const cleanName = stripEmoji(name);
+
+        const itemsHTML = s.items.map(row => {
+          const { num: iNum, name: iName } = parseItem(row.item);
+          const hasLink = row.link && row.link !== '' && !['not applicable at this point in time', 'awaiting pilot'].includes(row.link.toLowerCase());
+          const isDescriptionOnly = row.link && !isURL(row.link) && row.link.length > 60;
+          const isShortRef = row.link && !isURL(row.link) && row.link.length <= 60 && row.link !== '' && !['not applicable at this point in time', 'awaiting pilot'].includes(row.link.toLowerCase());
+
+          let linkHTML = '';
+          if (isURL(row.link)) {
+            linkHTML = `<div class="item-link-col"><a class="item-btn" href="${escapeHTML(row.link)}" target="_blank" rel="noopener">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              View
+            </a></div>`;
+          } else if (isShortRef && hasLink) {
+            linkHTML = `<div class="item-link-col"><span class="item-btn" style="cursor:default;opacity:0.75;">
+              ${escapeHTML(row.link)}
+            </span></div>`;
+          } else {
+            linkHTML = `<div class="item-link-col"></div>`;
+          }
+
+          const descHTML = (isDescriptionOnly && row.link)
+            ? `<div class="item-description">${escapeHTML(row.link.slice(0, 180))}${row.link.length > 180 ? '…' : ''}</div>`
+            : (row.link.toLowerCase() === 'not applicable at this point in time' || row.link.toLowerCase() === 'awaiting pilot')
+              ? `<div class="item-description" style="font-style:italic;">${escapeHTML(row.link)}</div>`
+              : '';
+
+          return `
+            <div class="item-row">
+              <div class="item-main">
+                <div class="item-number">${escapeHTML(iNum)}</div>
+                <div class="item-name">${escapeHTML(iName)}</div>
+                ${descHTML}
+              </div>
+              ${linkHTML}
+              <div class="item-date">${escapeHTML(row.date)}</div>
+            </div>`;
+        }).join('');
+
+        return `
+          <div class="section-group" id="${id}">
+            <div class="section-header">
+              <span class="section-title">${emoji} ${escapeHTML(cleanName)}</span>
+              <span class="section-number">${escapeHTML(num)}</span>
+            </div>
+            <div class="section-rule"></div>
+            ${itemsHTML || '<div style="padding:16px 0;color:var(--text-muted);font-size:0.8rem;">No items in this section yet.</div>'}
+          </div>`;
+      }).join('');
+
+      // Active nav highlight on scroll
+      setupScrollSpy(sections);
+    }
+
+    function extractEmoji(str) {
+      const m = str.match(/(\p{Emoji_Presentation}|\p{Extended_Pictographic})/u);
+      return m ? m[0] : '';
+    }
+    function stripEmoji(str) {
+      return str.replace(/(\p{Emoji_Presentation}|\p{Extended_Pictographic})\s*/gu, '').trim();
+    }
+    function escapeHTML(str) {
+      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function setupScrollSpy(sections) {
+      const navItems = document.querySelectorAll('.nav-item');
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            navItems.forEach(n => n.classList.remove('active'));
+            const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+            if (active) active.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+
+      sections.forEach(s => {
+        const { num } = parseItem(s.header.item);
+        const el = document.getElementById(`section-${num.replace('.', '-')}`);
+        if (el) observer.observe(el);
+      });
+    }
+
+    // ── Main loader ──
+    async function loadData() {
+      const configured = SHEET_CSV_URL !== 'YOUR_GOOGLE_SHEET_CSV_URL_HERE';
+
+      if (!configured) {
+        // Show layout with sample data + setup instructions
+        render(buildRows(SAMPLE_DATA.map(r => [r.item, r.link, r.date])), false);
+
+        // Show a setup notice at the top of content
+        const notice = document.createElement('div');
+        notice.className = 'state-box';
+        notice.style.cssText = 'padding:24px 0 40px;align-items:flex-start;';
+        notice.innerHTML = `
+          <div class="setup-hint">
+            <strong style="display:block;margin-bottom:8px;">📋 Setup: Connect your Google Sheet</strong>
+            This is a preview using your existing data. To connect live data:<br><br>
+            1. Open your Google Sheet<br>
+            2. <strong>File → Share → Publish to web</strong><br>
+            3. Select the <code>Angel Version</code> tab, format = <code>CSV</code><br>
+            4. Click <strong>Publish</strong> and copy the URL<br>
+            5. Open this HTML file, find <code>SHEET_CSV_URL</code> and paste the URL in
+          </div>`;
+        document.getElementById('content').prepend(notice);
+        return;
+      }
+
+      try {
+        const res = await fetch(SHEET_CSV_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        const parsed = parseCSV(text);
+        render(buildRows(parsed), true);
+      } catch (err) {
+        document.getElementById('content').innerHTML = `
+          <div class="state-box">
+            <p>Couldn't load data from the sheet.<br>
+            <strong>Error:</strong> ${escapeHTML(err.message)}</p>
+            <div class="setup-hint">
+              Make sure the Google Sheet is published as CSV and the URL is correct.<br>
+              Check that your sheet is publicly accessible (anyone with the link can view).
+            </div>
+          </div>`;
+      }
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>
